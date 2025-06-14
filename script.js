@@ -20,7 +20,14 @@ function appendToDisplay(value) {
     //I the current display shows zero and the user enters decimal, keep the zero
     }else if (currentValue === '0' && value ==='.') {
         display.value = currentValue + value;
-    } else {
+    }else if (value === '.'){
+        // Get the last number in the display
+        let lastNumber = currentValue.split('/[+\-*/]').pop();
+        //Only add the decimal if the current number doesnt have ont
+        if (!lastNumber.includes('.')) {
+            display.value = currentValue + value;
+        }
+    }else {
         display.value = currentValue + value;
     }
     // Reset the justCalculated flag when user strats typing
@@ -30,7 +37,13 @@ function appendToDisplay(value) {
 
 function clearDisplay() {
     console.log('Clear button pressed');
-    alert('Clear button was pressed');
+    display.value = '0';
+    justCalculated = false;
+
+    display.style.backgroundColor = '#f0f0f0';
+    setTimeout(()=> {
+        display.style.backgroundColor = '';
+    }, 150);
 }
 
 function deleteLast() {
@@ -42,13 +55,38 @@ function deleteLast() {
     } else {
         display.value = currentValue.slice(0, -1);
     }
-    alert('Backspace button was pressed');
 }
 
 function calculate() {
     console.log('Equals button pressed');
     alert('Equals button was pressed');
 }
+document.addEventListener('keydown', function(event){
+    console.log('Key pressed', event.key);
+
+    if(event.key>= '0' && event.key <= '9') {
+        appendToDisplay(event.key)
+    } else if (event.key === '.') {
+        appendToDisplay('.');
+    } else if (event.key === '+') {
+        appendToDisplay('+');
+    } else if (event.key === '-') {
+        appendToDisplay ('-');
+    } else if (event.key === '/') {
+        appendToDisplay('/');
+    } else if (event.key === '*') {
+        appendToDisplay('*'); 
+    }
+    
+    else if (event.key === 'Enter' || event.key === '=') {
+        calculate();
+    } else if (event.key === 'Escape' || event.key ==='c' || event.key ==='C') {
+        clearDisplay();
+    } else if (event.key === 'Backspace') {
+        deleteLast();
+    }
+})
+
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Calculate loaded succefully');
@@ -59,5 +97,4 @@ document.addEventListener('DOMContentLoaded', function() {
     } else{
         console.log('Display element not found');
     }
-}
-)
+})
