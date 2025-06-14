@@ -7,7 +7,25 @@ let justCalculated = false;
 
 function appendToDisplay(value) {
     console.log('Button pressed:', value);
-    alert('You pressed:' + value);   
+    let currentValue = display.value;
+    if (justCalculated && !isNaN(value)){
+        display.value = value;
+        justCalculated = false;
+        return;
+    }
+    // if current display shows zero and user enters a number we wanna replace the zero
+
+    if (currentValue === "0" && !isNaN(value)){
+        display.value = value;
+    //I the current display shows zero and the user enters decimal, keep the zero
+    }else if (currentValue === '0' && value ==='.') {
+        display.value = currentValue + value;
+    } else {
+        display.value = currentValue + value;
+    }
+    // Reset the justCalculated flag when user strats typing
+    justCalculated = false;
+  console.log('Display updated to:', display.value);  
 }
 
 function clearDisplay() {
@@ -17,6 +35,13 @@ function clearDisplay() {
 
 function deleteLast() {
     console.log('Backspace button pressed');
+    let currentValue = display.value;
+    //If theres only one charector or is zero, reset to zero
+    if (currentValue.length <= 1 || currentValue ==='0') {
+        display.value = '0';
+    } else {
+        display.value = currentValue.slice(0, -1);
+    }
     alert('Backspace button was pressed');
 }
 
