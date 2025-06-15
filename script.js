@@ -1,15 +1,38 @@
-//refrence display element
+//Refrence display element
 const display = document.getElementById('display');
 
 //Track if we have performed a calculation
 
 let justCalculated = false;
 
-function isOperator(char){
+function isOperator(char) {
     return ['+','-','*','/'].includes(char);
 }
 function getLastChar() {
     return display.value.slice(-1);
+}
+
+function safeEval(expression) {
+    try {
+        let jsExpression = expression
+        .replace(/x/g, '*')
+        .replace(/÷/g, '/');
+
+        if (!/^[0-9+\-*/.()]+$/.test(jsExpression)){
+            throw new Error('Invalid characters in expression');
+        }
+
+        const result = Function ('"use strict"; return (' + jsExpression + ')')();
+
+        if (!isFinite (result)){
+            throw new Error('Invslid calculation reuslt');   
+        }
+        return result;
+
+    } catch (error) {
+        console.error('Calculation error:', error);
+        return'Error';
+    }
 }
 
 function appendToDisplay(value) {
@@ -30,7 +53,7 @@ function appendToDisplay(value) {
 
     if (isOperator(value)){
         //Dont allow operator as first char, (exception for minus)
-        if (currentValue === '0' && value!== '-'){
+        if (currentValue === '0' && value !== '-'){
             return; //Do nothing
         }
 
@@ -41,7 +64,7 @@ function appendToDisplay(value) {
         } else {
             display.value = currentValue + value;
         } // if current display shows zero and user enters a number we wanna replace the zero
-    }else if (!isNaN(value)){ 
+        }else if (!isNaN(value)){ 
         if (currentValue === '0'){
             display.value = value;
         } else {
@@ -67,16 +90,16 @@ function appendToDisplay(value) {
     }
     // Reset the justCalculated flag when user strats typing
     justCalculated = false;
-  console.log('Display updated to:', display.value);  
+    console.log('Display updated to:', display.value);  
 }
 
 function clearDisplay() {
-    console.log('Clear button pressed');
+    console.log('Clear button pressed.');
     display.value = '0';
     justCalculated = false;
 
     display.style.backgroundColor = '#f0f0f0';
-    setTimeout(()=> {
+    setTimeout(() => {
         display.style.backgroundColor = '';
     }, 150);
 }
@@ -85,7 +108,7 @@ function deleteLast() {
     console.log('Backspace button pressed');
     let currentValue = display.value;
     //If theres only one charector or is zero, reset to zero
-    if (currentValue.length <= 1 || currentValue ==='0') {
+    if (currentValue.length <= 1 || currentValue === '0') {
         display.value = '0';
     } else {
         display.value = currentValue.slice(0, -1);
@@ -93,14 +116,42 @@ function deleteLast() {
 }
 
 function calculate() {
-    console.log('Equals button pressed');
-    alert('Equals button was pressed');
+    let expression = display.value;
+    // dont calc if display is zero or empty
+    if (expression === '0'|| expression === ''){
+        return;
+    }
+    //Dont calc if expression ends with an operator
+
+    if (isOperator(getLastChar())){
+        return;
+    }
+
+    let result = safeEval(expression);
+    if (result === 'Error') {
+        display.value = 'Error';
+        setTimeout(() => {
+            clearDisplay()
+        }, 2000);
+    } else{
+        if (Number.isInteger(result)) {
+            display.value = result.toString();
+        } else {
+            display.value = parseFloat(result.toFixed(10)).toString();
+        }
+
+        justCalculated = true;
+    }
+    display.style.backgroundColor = '#e8f5e8';
+    setTimeout(() => {
+        display.style.backgroundColor = '';
+    }, 300);
 }
 document.addEventListener('keydown', function(event){
     console.log('Key pressed', event.key);
 
     if(event.key>= '0' && event.key <= '9') {
-        appendToDisplay(event.key)
+        appendToDisplay(event.key);
     } else if (event.key === '.') {
         appendToDisplay('.');
     } else if (event.key === '+') {
@@ -121,7 +172,6 @@ document.addEventListener('keydown', function(event){
         deleteLast();
     }
 })
-
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Calculate loaded succefully');
